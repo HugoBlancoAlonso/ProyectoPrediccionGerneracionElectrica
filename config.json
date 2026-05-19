@@ -1,0 +1,15 @@
+{
+  "BUCKET": "datalake-energia",
+  "PREFIJO_ESIOS": "bronce/esios/",
+  "PREFIJO_AEMET": "bronce/aemet/",
+  "PREFIJO_FESTIVOS": "bronce/festivos/",
+  "REGION": "eu-west-1",
+  "HDFS_HOST": "localhost",
+  "HDFS_PORT": 9870,
+  "TEMP_DIR": "data/temp_bronce",
+  "PLATA_DIR": "data/plata",
+  "HDFS_PLATA": "/datalake/plata",
+  "LOG_LEVEL": "INFO",
+  "RETRIES": 3,
+  "TIMEOUT_SEGUNDOS": 300
+}
