@@ -18,6 +18,7 @@ Repositorio del proyecto final con dos etapas principales:
 
 - Python 3.10 o superior.
 - Docker y Docker Compose.
+- Acceso a Jupyter en local o en Docker.
 - Acceso a HDFS en local o al entorno configurado en `docker-compose.yml`.
 - Credenciales y acceso a las fuentes de datos usadas en la capa Plata, si vas a regenerar los datos desde cero.
 
@@ -97,10 +98,11 @@ El dashboard final no necesita servidor Python para visualizarse. Se puede:
 
 ## Flujo de trabajo recomendado
 
-1. Levantar HDFS con Docker.
-2. Ejecutar la capa Plata para obtener los datos procesados.
-3. Ejecutar la capa Oro para consolidar y generar el dashboard.
-4. Abrir el HTML generado o el notebook de Oro para analizar los resultados.
+1. Conectar AWS a jupyter.
+2. Levantar HDFS con Docker.
+3. Ejecutar la capa Plata para obtener los datos procesados.
+4. Ejecutar la capa Oro para consolidar y generar el dashboard.
+5. Abrir el HTML generado o el notebook de Oro para analizar los resultados.
 
 ## Notas importantes
 
