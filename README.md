@@ -52,7 +52,7 @@ docker compose up -d
 ```
 2. Conectar HDFS con jupyter
 ```
-docker network connect proyectofinal_default jupyter_datascience
+docker network connect proyectofinal-iaybd_default jupyter_datascience
 ```
 
 3. Verificar que el NameNode responde en `http://localhost:9870`.
