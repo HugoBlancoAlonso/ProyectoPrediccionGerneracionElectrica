@@ -49,8 +49,8 @@ def cargar_dataframe() -> pd.DataFrame:
         "Provincia",
         "Estación",
         "tipo_dia",
-      "tipo de energia_Hidráulica",
-      "tipo de energia",
+        "tipo de energia_Hidráulica",
+        "tipo de energia",
         "porcentaje",
         "valor",
         "Temperatura media (ºC)",
@@ -65,7 +65,7 @@ def cargar_dataframe() -> pd.DataFrame:
     df = df.dropna(subset=["fecha"]).copy()
 
     for columna in [
-      "porcentaje",
+        "porcentaje",
         "valor",
         "Temperatura media (ºC)",
         "HDD",
@@ -81,12 +81,12 @@ def cargar_dataframe() -> pd.DataFrame:
             df[columna] = df[columna].astype("string")
 
     if "tipo de energia" in df.columns:
-      df["tipo_energia"] = df["tipo de energia"].astype("string")
+        df["tipo_energia"] = df["tipo de energia"].astype("string")
     elif "tipo de energia_Hidráulica" in df.columns:
-      dummy_hidraulica = pd.to_numeric(df["tipo de energia_Hidráulica"], errors="coerce").fillna(0)
-      df["tipo_energia"] = dummy_hidraulica.map({1: "Hidráulica", 0: "Eólica"}).fillna("Sin dato")
+        dummy_hidraulica = pd.to_numeric(df["tipo de energia_Hidráulica"], errors="coerce").fillna(0)
+        df["tipo_energia"] = dummy_hidraulica.map({1: "Hidráulica", 0: "Eólica"}).fillna("Sin dato")
     else:
-      df["tipo_energia"] = "Sin dato"
+        df["tipo_energia"] = "Sin dato"
 
     df["fecha"] = df["fecha"].dt.strftime("%Y-%m-%d")
     return df
@@ -163,8 +163,71 @@ def construir_html(df: pd.DataFrame) -> str:
       color: var(--ink);
       outline: none;
     }}
-    select[multiple] {{ min-height: 108px; }}
     input:focus, select:focus {{ border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }}
+    
+    .tick-container {{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 4px 0;
+    }}
+    .tick-label {{
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding-left: 28px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--ink);
+      user-select: none;
+      text-transform: none;
+      font-weight: 500;
+      letter-spacing: normal;
+      margin-bottom: 0;
+    }}
+    .tick-label input {{
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }}
+    .checkmark {{
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 18px;
+      width: 18px;
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }}
+    .tick-label:hover input ~ .checkmark {{
+      border-color: var(--accent);
+    }}
+    .tick-label input:checked ~ .checkmark {{
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }}
+    .checkmark:after {{
+      content: "";
+      position: absolute;
+      display: none;
+    }}
+    .tick-label input:checked ~ .checkmark:after {{
+      display: block;
+    }}
+    .tick-label .checkmark:after {{
+      left: 6px;
+      top: 2px;
+      width: 4px;
+      height: 9px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }}
+    
     .kpis {{ display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }}
     .kpi {{
       background: linear-gradient(180deg, #ffffff, #f8fbff);
@@ -176,7 +239,9 @@ def construir_html(df: pd.DataFrame) -> str:
     .kpi .label {{ font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }}
     .kpi .value {{ font-size: 26px; font-weight: 800; margin-top: 7px; line-height: 1.05; }}
     .kpi .sub {{ font-size: 12px; color: #475569; margin-top: 6px; }}
-    .charts {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }}
+    
+    /* Configuración de 3 columnas para lograr simetría perfecta con 6 gráficos */
+    .charts {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }}
     .chart-card {{
       background: white;
       border: 1px solid rgba(148, 163, 184, 0.22);
@@ -185,8 +250,9 @@ def construir_html(df: pd.DataFrame) -> str:
       min-height: 420px;
       box-shadow: 0 12px 32px rgba(15, 23, 42, 0.05);
     }}
-    .chart-card h3 {{ margin: 2px 4px 10px 4px; font-size: 15px; color: #0f172a; }}
+    .chart-card h3 {{ margin: 2px 4px 10px 4px; font-size: 14px; color: #0f172a; }}
     .chart {{ width: 100%; height: 360px; }}
+    
     .table-wrap {{
       overflow: auto;
       border-radius: 14px;
@@ -214,14 +280,17 @@ def construir_html(df: pd.DataFrame) -> str:
     }}
     .footer-note {{ color: #475569; font-size: 12px; margin-top: 8px; }}
     .status {{ margin-top: 8px; font-size: 12px; color: #475569; }}
+    @media (max-width: 1400px) {{
+      .charts {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+    }}
     @media (max-width: 1200px) {{
       .control, .control.wide, .control.small {{ grid-column: span 6; }}
       .kpis {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
-      .charts {{ grid-template-columns: 1fr; }}
     }}
     @media (max-width: 760px) {{
       .control, .control.wide, .control.small {{ grid-column: span 12; }}
       .kpis {{ grid-template-columns: 1fr; }}
+      .charts {{ grid-template-columns: 1fr; }}
     }}
   </style>
 </head>
@@ -229,7 +298,6 @@ def construir_html(df: pd.DataFrame) -> str:
   <div class="wrap">
     <section class="hero">
       <h1>Dashboard interactivo de DataFrame de generacion de energía Eólica e Hidráulica</h1>
-    
       <p>Explora el consolidado final combinando clima, generación energética y festivos. Los gráficos se recalculan en el navegador sobre el subconjunto filtrado por provincia, estación, fechas y tipo de día.</p>
     </section>
 
@@ -283,9 +351,9 @@ def construir_html(df: pd.DataFrame) -> str:
           <div class="status"><span id="topNLabel">10</span> categorías</div>
         </div>
         <div class="control wide">
-          <label for="typeFilter">Tipo de día</label>
-          <select id="typeFilter" multiple size="3"></select>
-          <div class="status">Ctrl/Cmd para seleccionar varios tipos</div>
+          <label>Tipo de día</label>
+          <div class="tick-container" id="typeFilterContainer"></div>
+          <div class="status">Marca o desmarca casillas para filtrar en tiempo real</div>
         </div>
       </div>
     </section>
@@ -300,7 +368,9 @@ def construir_html(df: pd.DataFrame) -> str:
       <div class="chart-card"><h3 id="barTitle">Comparativa</h3><div id="barChart" class="chart"></div></div>
       <div class="chart-card"><h3 id="pieTitle">Distribución porcentual de generación</h3><div id="pieChart" class="chart"></div></div>
       <div class="chart-card"><h3>Relación temperatura - generación electrica</h3><div id="scatterChart" class="chart"></div></div>
-      <div class="chart-card"><h3>Distribución de genaeración por tipo de día</h3><div id="boxChart" class="chart"></div></div>
+      <div class="chart-card"><h3>Distribución de generación por tipo de día</h3><div id="boxChart" class="chart"></div></div>
+      
+      <div class="chart-card"><h3>Matriz de Correlación Climático-Energética</h3><div id="heatmapChart" class="chart"></div></div>
     </section>
 
     <section class="panel">
@@ -341,16 +411,16 @@ def construir_html(df: pd.DataFrame) -> str:
       group: document.getElementById('groupFilter'),
       energy: document.getElementById('energyFilter'),
       topN: document.getElementById('topN'),
-      type: document.getElementById('typeFilter'),
+      typeContainer: document.getElementById('typeFilterContainer'),
     }};
 
     const labels = {{
-      valor: 'Valor',
-      'Temperatura media (ºC)': 'Temperatura media',
+      valor: 'Valor Gen.',
+      'Temperatura media (ºC)': 'Temp. Media',
       HDD: 'HDD',
       CDD: 'CDD',
-      Amplitud_Termica: 'Amplitud térmica',
-      Precipitacion_Total_Calculada: 'Precipitación total'
+      Amplitud_Termica: 'Amp. Térmica',
+      Precipitacion_Total_Calculada: 'Precip. Total'
     }};
 
     const formatNumber = (value, digits = 2) => {{
@@ -378,15 +448,28 @@ def construir_html(df: pd.DataFrame) -> str:
       controls.station.innerHTML = stations.map(v => `<option value="${{String(v).replaceAll('"', '&quot;')}}">${{v}}</option>`).join('');
       controls.station.value = stations.includes(currentStation) ? currentStation : 'Todas';
 
-      const currentTypes = new Set(Array.from(controls.type.selectedOptions).map(option => option.value));
+      const checkedTypes = new Set(Array.from(controls.typeContainer.querySelectorAll('input:checked')).map(cb => cb.value));
       const types = uniqueSorted('tipo_dia');
-      controls.type.innerHTML = types.map(v => `<option value="${{String(v).replaceAll('"', '&quot;')}}" selected>${{v}}</option>`).join('');
-      Array.from(controls.type.options).forEach(option => {{
-        option.selected = currentTypes.size === 0 || currentTypes.has(option.value);
-      }});
+      const esPrimeraCarga = controls.typeContainer.children.length === 0;
+
+      controls.typeContainer.innerHTML = types.map(v => {{
+        const isChecked = esPrimeraCarga || checkedTypes.has(String(v));
+        const checkedAttr = isChecked ? 'checked' : '';
+        const safeVal = String(v).replaceAll('"', '&quot;');
+        return `
+          <label class="tick-label">
+            <input type="checkbox" value="${{safeVal}}" ${{checkedAttr}} onchange="refresh()">
+            <span class="checkmark"></span>
+            ${{v}}
+          </label>
+        `;
+      }}).join('');
     }};
 
-    const selectedTypes = () => Array.from(controls.type.selectedOptions).map(option => option.value);
+    const selectedTypes = () => {{
+      const checkedBoxes = controls.typeContainer.querySelectorAll('input:checked');
+      return Array.from(checkedBoxes).map(cb => cb.value);
+    }};
 
     const filteredData = () => {{
       const start = controls.dateStart.value ? new Date(controls.dateStart.value + 'T00:00:00') : null;
@@ -403,7 +486,9 @@ def construir_html(df: pd.DataFrame) -> str:
         if (province !== 'Todas' && row.Provincia !== province) return false;
         if (station !== 'Todas' && row.Estación !== station) return false;
         if (energy !== 'Todas' && String(row.tipo_energia || 'Sin dato') !== energy) return false;
-        if (types.size > 0 && !types.has(String(row.tipo_dia || ''))) return false;
+        
+        if (types.size === 0) return false;
+        if (!types.has(String(row.tipo_dia || ''))) return false;
         return true;
       }});
     }};
@@ -464,7 +549,6 @@ def construir_html(df: pd.DataFrame) -> str:
         <div class="kpi"><div class="label">Fuentes energía</div><div class="value">${{uniqueEnergy.size.toLocaleString('es-ES')}}</div><div class="sub">Eólica / hidráulica</div></div>
         <div class="kpi"><div class="label">Valor medio</div><div class="value">${{formatNumber(avgValue)}}</div><div class="sub">Promedio del subconjunto</div></div>
         <div class="kpi"><div class="label">Temp. media</div><div class="value">${{formatNumber(avgTemp)}} ºC</div><div class="sub">Promedio climático</div></div>
-        <div class="kpi"><div class="label">Precipitación</div><div class="value">${{formatNumber(avgPrecip)}} mm</div><div class="sub">Media diaria calculada</div></div>
       `;
 
       document.getElementById('filterStatus').textContent = rows.length
@@ -508,11 +592,7 @@ def construir_html(df: pd.DataFrame) -> str:
     }};
 
     const renderPie = rows => {{
-      const energyBuckets = {{
-        'Eólica': [],
-        'Hidráulica': []
-      }};
-
+      const energyBuckets = {{ 'Eólica': [], 'Hidráulica': [] }};
       const dailyEnergy = new Map();
       rows.forEach(row => {{
         const energia = String(row.tipo_energia || 'Sin dato');
@@ -529,12 +609,8 @@ def construir_html(df: pd.DataFrame) -> str:
         }}
       }});
 
-      const mediaEolica = energyBuckets['Eólica'].length
-        ? energyBuckets['Eólica'].reduce((a, b) => a + b, 0) / energyBuckets['Eólica'].length
-        : 0;
-      const mediaHidraulica = energyBuckets['Hidráulica'].length
-        ? energyBuckets['Hidráulica'].reduce((a, b) => a + b, 0) / energyBuckets['Hidráulica'].length
-        : 0;
+      const mediaEolica = energyBuckets['Eólica'].length ? energyBuckets['Eólica'].reduce((a, b) => a + b, 0) / energyBuckets['Eólica'].length : 0;
+      const mediaHidraulica = energyBuckets['Hidráulica'].length ? energyBuckets['Hidráulica'].reduce((a, b) => a + b, 0) / energyBuckets['Hidráulica'].length : 0;
       const otros = Math.max(0, 100 - mediaEolica - mediaHidraulica);
 
       const minDate = controls.dateStart.value || '';
@@ -571,7 +647,7 @@ def construir_html(df: pd.DataFrame) -> str:
         groups.get(key).x.push(Number(row['Temperatura media (ºC)']));
         groups.get(key).y.push(Number(row.valor));
       }});
-      [...groups.entries()].forEach(([key, coords], index) => {{
+      sample.length && [...groups.entries()].forEach(([key, coords], index) => {{
         const palette = ['#2563eb', '#f97316', '#14b8a6', '#8b5cf6', '#ef4444'];
         traces.push({{
           x: coords.x,
@@ -617,6 +693,63 @@ def construir_html(df: pd.DataFrame) -> str:
       }}, {{ displayModeBar: false, responsive: true }});
     }};
 
+    // NUEVA FUNCIÓN INTERACTIVA EN JAVASCRIPT: Cálculo matemático del Heatmap de Correlación
+    const renderHeatmap = rows => {{
+      const vars = ['valor', 'porcentaje', 'Temperatura media (ºC)', 'HDD', 'CDD', 'Amplitud_Termica', 'Precipitacion_Total_Calculada'];
+      const textLabels = ['Valor Gen.', 'Mix %', 'Temp. Media', 'HDD', 'CDD', 'Amp. Térmica', 'Precip. Total'];
+      
+      // 1. Extraer series numéricas válidas limpiando nulos
+      const dataMatrix = vars.map(v => rows.map(r => Number(r[v])).filter(num => !Number.isNaN(num)));
+      const n = dataMatrix[0] ? dataMatrix[0].length : 0;
+      
+      const zValues = [];
+      
+      // Función auxiliar para calcular el coeficiente de correlación de Pearson
+      const pearsonCorr = (x, y) => {{
+        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0, count = 0;
+        for (let i = 0; i < x.length; i++) {{
+          if (!Number.isNaN(x[i]) && !Number.isNaN(y[i])) {{
+            sumX += x[i]; sumY += y[i]; sumXY += x[i] * y[i];
+            sumX2 += x[i] * x[i]; sumY2 += y[i] * y[i];
+            count++;
+          }}
+        }}
+        if (count === 0) return 0;
+        const num = (count * sumXY) - (sumX * sumY);
+        const den = Math.sqrt(((count * sumX2) - (sumX * sumX)) * ((count * sumY2) - (sumY * sumY)));
+        return den === 0 ? 0 : num / den;
+      }};
+
+      // 2. Construir la matriz cruzada bidimensional
+      for (let i = 0; i < vars.length; i++) {{
+        const rowCorr = [];
+        for (let j = 0; j < vars.length; j++) {{
+          const valX = rows.map(r => Number(r[vars[i]]));
+          const valY = rows.map(r => Number(r[vars[j]]));
+          rowCorr.push(n > 1 ? pearsonCorr(valX, valY) : 0);
+        }}
+        zValues.push(rowCorr);
+      }}
+
+      // 3. Pintar la matriz simétrica mediante Plotly
+      Plotly.newPlot('heatmapChart', [{{
+        z: zValues,
+        x: textLabels,
+        y: textLabels,
+        type: 'heatmap',
+        colorscale: 'RdBu',
+        zmin: -1,
+        zmax: 1,
+        showscale: true,
+        hovertemplate: '%{{x}} vs %{{y}}<br>Correlación: %{{z:.3f}}<extra></extra>'
+      }}], {{
+        margin: {{ t: 16, r: 20, b: 50, l: 85 }},
+        paper_bgcolor: 'white',
+        plot_bgcolor: 'white',
+        xaxis: {{ tickangle: -25 }}
+      }}, {{ displayModeBar: false, responsive: true }});
+    }};
+
     const renderTable = rows => {{
       const preview = sampleRows(rows);
       document.getElementById('sampleTable').innerHTML = preview.map(row => `
@@ -637,7 +770,9 @@ def construir_html(df: pd.DataFrame) -> str:
     }};
 
     const refresh = () => {{
-      updateOptions();
+      if (controls.typeContainer.children.length === 0) {{
+         updateOptions();
+      }}
       const rows = filteredData();
       document.getElementById('topNLabel').textContent = controls.topN.value;
       updateKpis(rows);
@@ -646,11 +781,12 @@ def construir_html(df: pd.DataFrame) -> str:
       renderPie(rows);
       renderScatter(rows);
       renderBox(rows);
+      renderHeatmap(rows); // Ejecución sincronizada con los filtros en vivo
       renderTable(rows);
     }};
 
     ['change', 'input'].forEach(eventName => {{
-      controls.province.addEventListener(eventName, refresh);
+      controls.province.addEventListener(eventName, () => {{ updateOptions(); refresh(); }});
       controls.station.addEventListener(eventName, refresh);
       controls.energy.addEventListener(eventName, refresh);
       controls.dateStart.addEventListener(eventName, refresh);
@@ -658,7 +794,6 @@ def construir_html(df: pd.DataFrame) -> str:
       controls.metric.addEventListener(eventName, refresh);
       controls.group.addEventListener(eventName, refresh);
       controls.topN.addEventListener(eventName, refresh);
-      controls.type.addEventListener(eventName, refresh);
     }});
 
     if (rawData.length > 0) {{
