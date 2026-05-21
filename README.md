@@ -18,6 +18,7 @@ Repositorio del proyecto final con dos etapas principales:
 
 - Python 3.10 o superior.
 - Docker y Docker Compose.
+- Acceso a Jupyter notebooks.
 - Acceso a HDFS en local o al entorno configurado en `docker-compose.yml`.
 - Credenciales y acceso a las fuentes de datos usadas en la capa Plata, si vas a regenerar los datos desde cero.
 
@@ -54,6 +55,16 @@ docker compose up -d
 ```
 docker network connect proyectofinal-iaybd_default jupyter_datascience
 ```
+---------------------------------------------------------------------------------------------------------------------------------------
+
+En caso de no funcionar hacer del compose up de ```jupiter.yml```
+
+    - 1. Cambiar el nombre de dicho archivo a ```compose.yml```
+
+    - 2. Ejecutarlo en una carpeta a parte ```docker compose up -d```.
+
+    - 3. Meter este proyecto dentro de la carpeta notebooks generda por el compose.yml
+---------------------------------------------------------------------------------------------------------------------------------------
 
 3. Verificar que el NameNode responde en `http://localhost:9870`.
 
@@ -70,8 +81,9 @@ docker exec namenode hdfs dfs -chmod -R 777 /datalake
 ## Ejecución de la capa Plata
 
 1. Abrir [plata/extracion.ipynb](plata/extracion.ipynb).
-2. Ejecutar las celdas en orden.
-3. Comprobar que se generan los archivos parquet intermedios y que se suben a HDFS.
+2. Conectarse al kernel de jupyter.
+3. Ejecutar las celdas en orden.
+4. Comprobar que se generan los archivos parquet intermedios y que se suben a HDFS.
 
 ## Ejecución de la capa Oro
 
